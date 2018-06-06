@@ -88,6 +88,8 @@ void FTM_INPUT_CAPTURE_HANDLER(void)
 /*!
  * @brief Main function
  */
+
+/* Main function */
 int main(void)
 {
     ftm_config_t ftmInfo;
