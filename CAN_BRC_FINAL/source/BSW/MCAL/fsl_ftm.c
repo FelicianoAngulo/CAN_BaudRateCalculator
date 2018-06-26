@@ -34,6 +34,8 @@
 
 #include "fsl_ftm.h"
 
+
+ptrToFunc ecual_callback;
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
@@ -221,12 +223,12 @@ static void FTM_SetReloadPoints(FTM_Type *base, uint32_t reloadPoints)
     base->SYNC = reg;
 }
 
-status_t FTM_Init(FTM_Type *base, const ftm_config_t *config)
+status_t FTM_Init(FTM_Type *base, const ftm_config_t *config, ptrToVoidF callback)
 {
     assert(config);
 
     uint32_t reg;
-
+    ecual_callback = callback;
     if (!(config->pwmSyncMode &
           (FTM_SYNC_TRIG0_MASK | FTM_SYNC_TRIG1_MASK | FTM_SYNC_TRIG2_MASK | FTM_SYNC_SWSYNC_MASK)))
     {
@@ -914,4 +916,16 @@ void FTM_ClearStatusFlags(FTM_Type *base, uint32_t mask)
 #endif
     /* Clear the channel status flags by writing a 0 to the bit */
     base->STATUS &= ~(mask & 0xFFU);
+}
+
+void FTM_INPUT_CAPTURE_HANDLER(void)
+{
+	FTM_ClearStatusFlags(DEMO_FTM_BASEADDR, FTM_CHANNEL_FLAG);
+	val1_List[valCounter] = DEMO_FTM_BASEADDR->CONTROLS[BOARD_FTM_INPUT_CAPTURE_CHANNEL_PAIR * 2].CnV;
+	val2_List[valCounter] = DEMO_FTM_BASEADDR->CONTROLS[(BOARD_FTM_INPUT_CAPTURE_CHANNEL_PAIR * 2) + 1].CnV;
+
+	if(valCounter == arrayLength)
+	{
+		FTM_DisableInterrupts(DEMO_FTM_BASEADDR, FTM_CHANNEL_INTERRUPT_ENABLE);
+	}
 }

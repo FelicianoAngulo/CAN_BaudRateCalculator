@@ -8,6 +8,8 @@
 #ifndef SWC_BRC_APP_H_
 #define SWC_BRC_APP_H_
 
+void BRC_Init();
+uint32_t BRC_CalculateBaudeRate();
 
 
 #endif /* SWC_BRC_APP_H_ */

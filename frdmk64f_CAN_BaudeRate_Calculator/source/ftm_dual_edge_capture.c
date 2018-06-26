@@ -65,7 +65,7 @@
  * Variables
  ******************************************************************************/
 volatile bool captureFinishedFlag = false;
-#define arrayLength 1000
+#define arrayLength 200
 float pulseWidth_List[arrayLength];
 uint32_t val1_List[arrayLength];
 uint32_t val2_List[arrayLength];

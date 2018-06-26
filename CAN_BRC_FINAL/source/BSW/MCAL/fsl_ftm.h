@@ -50,7 +50,8 @@
 /*@{*/
 #define FSL_FTM_DRIVER_VERSION (MAKE_VERSION(2, 0, 2)) /*!< Version 2.0.2 */
                                                        /*@}*/
-
+/*pointer to a void function*/
+typedef void(*ptrToFunc)(uint32_t);
 /*!
  * @brief List of FTM channels
  * @note Actual number of available channels is SoC dependent
@@ -384,7 +385,7 @@ extern "C" {
  *
  * @return kStatus_Success indicates success; Else indicates failure.
  */
-status_t FTM_Init(FTM_Type *base, const ftm_config_t *config);
+status_t FTM_Init(FTM_Type *base, const ftm_config_t *config, ptrToFunc callback);
 
 /*!
  * @brief Gates the FTM clock.
