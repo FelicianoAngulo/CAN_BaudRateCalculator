@@ -14,7 +14,7 @@ float roundNearest(float val);
 /* Get source clock for FTM driver */
 #define FTM_SOURCE_CLOCK CLOCK_GetFreq(kCLOCK_BusClk)
 #define arrayLength 200
-float * captureArray;
+float * appCaptureArray;
 uint32_t * pulseWidthArray;
 uint32_t * overflowArray;
 uint32_t baudeRates[MAX_IN_CAP] = {0};
@@ -41,7 +41,7 @@ void BRC_Init()
 	{
 		FTM_ECUAL_Init(captureChannelList[i]);
 	}
-	captureArray = (float *)malloc(sizeof(float) * arrayLength);
+	appCaptureArray = (float *)malloc(sizeof(float) * arrayLength);
 	pulseWidthArray = (uint32_t *)malloc(sizeof(uint32_t) * arrayLength);
 	overflowArray = (uint32_t *)malloc(sizeof(uint32_t) * arrayLength);
 }
@@ -51,7 +51,7 @@ uint32_t BRC_CalculateBaudRate(uint8_t channel)
 {
 	if(channel < MAX_IN_CAP)
 	{
-		FTM_ECAL_GET_DATA(channel, captureArray, (uint16_t)arrayLength);
+		FTM_ECAL_GET_DATA(channel, appCaptureArray, overflowArray, (uint16_t)arrayLength);
 	}
 	/*extract bit time*/
 	return 0;
@@ -69,19 +69,19 @@ uint8_t convertToTime(void)
 	    {
 	    	if(overflowArray[i] == 0)
 	    	{
-	    		if(captureArray[i] <= captureArray[i - 1])
+	    		if(appCaptureArray[i] <= appCaptureArray[i - 1])
 	    		{
-	    			currentPulseWidth = 65536 - captureArray[i - 1] + captureArray[i];
+	    			currentPulseWidth = 65536 - appCaptureArray[i - 1] + appCaptureArray[i];
 	    		}
 	    		else
 	    		{
-	    			currentPulseWidth = captureArray[i] - captureArray[i - 1] + 1;
+	    			currentPulseWidth = appCaptureArray[i] - appCaptureArray[i - 1] + 1;
 	    		}
 	    	}
 	    	else
 	    	{//65536
 	    		//printf("OVERFLOW:%d\r\n", overflowArray[i]);
-	    		currentPulseWidth = (65536 * overflowArray[i]) - captureArray[i - 1] + captureArray[i];
+	    		currentPulseWidth = (65536 * overflowArray[i]) - appCaptureArray[i - 1] + appCaptureArray[i];
 	    	}
 	    	//Calculate pulseWidth in milliseconds
 	    	if(currentPulseWidth > 0)
