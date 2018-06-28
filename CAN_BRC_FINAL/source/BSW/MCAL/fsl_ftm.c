@@ -36,6 +36,14 @@
 
 
 ptrToFunc ecual_callback;
+// hardcoded
+#define BOARD_FTM_BASEADDR FTM0
+/* FTM channel used for input capture */
+#define BOARD_FTM_INPUT_CAPTURE_CHANNEL kFTM_Chnl_0
+/* Interrupt to enable and flag to read */
+#define FTM_CHANNEL_INTERRUPT_ENABLE kFTM_Chnl0InterruptEnable | kFTM_TimeOverflowInterruptEnable
+#define FTM_CHANNEL_FLAG kFTM_Chnl0Flag
+#define FTM_OFI_FLAG kFTM_TimeOverflowFlag
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
@@ -223,7 +231,7 @@ static void FTM_SetReloadPoints(FTM_Type *base, uint32_t reloadPoints)
     base->SYNC = reg;
 }
 
-status_t FTM_Init(FTM_Type *base, const ftm_config_t *config, ptrToVoidF callback)
+status_t FTM_Init(FTM_Type *base, const ftm_config_t *config, ptrToFunc callback)
 {
     assert(config);
 
@@ -556,7 +564,6 @@ void FTM_SetupInputCapture(FTM_Type *base,
                            uint32_t filterValue)
 {
     uint32_t reg;
-
     /* Clear the combine bit for the channel pair */
     base->COMBINE &= ~(1U << (FTM_COMBINE_COMBINE0_SHIFT + (FTM_COMBINE_COMBINE1_SHIFT * (chnlNumber >> 1))));
     /* Clear the dual edge capture mode because it's it's higher priority */
@@ -920,12 +927,6 @@ void FTM_ClearStatusFlags(FTM_Type *base, uint32_t mask)
 
 void FTM_INPUT_CAPTURE_HANDLER(void)
 {
-	FTM_ClearStatusFlags(DEMO_FTM_BASEADDR, FTM_CHANNEL_FLAG);
-	val1_List[valCounter] = DEMO_FTM_BASEADDR->CONTROLS[BOARD_FTM_INPUT_CAPTURE_CHANNEL_PAIR * 2].CnV;
-	val2_List[valCounter] = DEMO_FTM_BASEADDR->CONTROLS[(BOARD_FTM_INPUT_CAPTURE_CHANNEL_PAIR * 2) + 1].CnV;
-
-	if(valCounter == arrayLength)
-	{
-		FTM_DisableInterrupts(DEMO_FTM_BASEADDR, FTM_CHANNEL_INTERRUPT_ENABLE);
-	}
+	FTM_ClearStatusFlags(BOARD_FTM_BASEADDR, FTM_CHANNEL_FLAG);
+	ecual_callback(BOARD_FTM_BASEADDR->CONTROLS[BOARD_FTM_INPUT_CAPTURE_CHANNEL].CnV);
 }
