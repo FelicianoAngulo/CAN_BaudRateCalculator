@@ -32,7 +32,7 @@ uint32_t * ofArray;
 uint16_t CAPTURE_SIZE = 0;
 uint32_t captureCounter = 0;
 uint32_t of_counter = 0;
-void processFtmInterrupt(uint32_t value);
+void processFtmInterrupt(void);
 
 void FTM_ECUAL_Init(uint8_t channelID)
 {
@@ -47,11 +47,6 @@ void FTM_ECUAL_Init(uint8_t channelID)
 
     /* Set the timer to be in free-running mode */
     BOARD_FTM_BASEADDR->MOD = 0xFFFF;
-    /* Enable channel interrupt when the second edge is detected */
-	FTM_EnableInterrupts(BOARD_FTM_BASEADDR, FTM_CHANNEL_INTERRUPT_ENABLE);
-
-	/* Enable at the NVIC */
-	EnableIRQ(FTM_INTERRUPT_NUMBER);
 }
 
 void FTM_ECAL_GET_DATA(uint8_t channel, float * arrayFortimer, uint32_t * arrayForOverflow, uint16_t length)
@@ -61,6 +56,11 @@ void FTM_ECAL_GET_DATA(uint8_t channel, float * arrayFortimer, uint32_t * arrayF
 	CAPTURE_SIZE = length;
 	captureCounter = 0;
 	of_counter = 0;
+	/* Enable channel interrupt when the second edge is detected */
+	FTM_EnableInterrupts(BOARD_FTM_BASEADDR, FTM_CHANNEL_INTERRUPT_ENABLE);
+
+	/* Enable at the NVIC */
+	EnableIRQ(FTM_INTERRUPT_NUMBER);
 	FTM_StartTimer(BOARD_FTM_BASEADDR, kFTM_SystemClock);
 
 	/* wait for finish capture */
@@ -69,30 +69,36 @@ void FTM_ECAL_GET_DATA(uint8_t channel, float * arrayFortimer, uint32_t * arrayF
 	}
 
 	FTM_StopTimer(BOARD_FTM_BASEADDR);
-	FTM_Deinit(BOARD_FTM_BASEADDR);
+	//FTM_Deinit(BOARD_FTM_BASEADDR);
 }
 
-void processFtmInterrupt(uint32_t value)
+void FTM_INPUT_CAPTURE_HANDLER(void)
 {
 	if ((FTM_GetStatusFlags(BOARD_FTM_BASEADDR) & FTM_CHANNEL_FLAG) == FTM_CHANNEL_FLAG)
-	{
-		/* Clear interrupt flag.*/
-		FTM_ClearStatusFlags(BOARD_FTM_BASEADDR, FTM_CHANNEL_FLAG);
-		captureArray[captureCounter] = value;
-		ofArray[captureCounter] = of_counter;
-		of_counter = 0;
-		captureCounter++;
+	    {
+	        /* Clear interrupt flag.*/
+	        FTM_ClearStatusFlags(BOARD_FTM_BASEADDR, FTM_CHANNEL_FLAG);
+	        //captureArray[captureCounter] = FTM_GetCapturedRegValue(BOARD_FTM_BASEADDR, BOARD_FTM_INPUT_CAPTURE_CHANNEL);
+	        captureArray[captureCounter] = BOARD_FTM_BASEADDR->CONTROLS[BOARD_FTM_INPUT_CAPTURE_CHANNEL].CnV;
+	        ofArray[captureCounter] = of_counter;
+	        of_counter = 0;
+	        captureCounter++;
 
-		if(captureCounter == CAPTURE_SIZE)
+	        if(captureCounter == CAPTURE_SIZE)
+			{
+				FTM_DisableInterrupts(BOARD_FTM_BASEADDR, FTM_CHANNEL_INTERRUPT_ENABLE);
+				captureFinishedFlag = true;
+			}
+	    }
+	    else if ((FTM_GetStatusFlags(BOARD_FTM_BASEADDR) & FTM_OFI_FLAG) == FTM_OFI_FLAG)
 		{
-			FTM_DisableInterrupts(BOARD_FTM_BASEADDR, FTM_CHANNEL_INTERRUPT_ENABLE);
-			captureFinishedFlag = true;
+			FTM_ClearStatusFlags(BOARD_FTM_BASEADDR, FTM_OFI_FLAG);
+			//printf("overflow flag\r\n");
+			of_counter++;
 		}
-	}
-	else if ((FTM_GetStatusFlags(BOARD_FTM_BASEADDR) & FTM_OFI_FLAG) == FTM_OFI_FLAG)
-	{
-		FTM_ClearStatusFlags(BOARD_FTM_BASEADDR, FTM_OFI_FLAG);
-		//printf("overflow flag\r\n");
-		of_counter++;
-	}
+}
+
+void processFtmInterrupt(void)
+{
+
 }

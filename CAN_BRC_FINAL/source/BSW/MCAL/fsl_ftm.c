@@ -36,14 +36,7 @@
 
 
 ptrToFunc ecual_callback;
-// hardcoded
-#define BOARD_FTM_BASEADDR FTM0
-/* FTM channel used for input capture */
-#define BOARD_FTM_INPUT_CAPTURE_CHANNEL kFTM_Chnl_0
-/* Interrupt to enable and flag to read */
-#define FTM_CHANNEL_INTERRUPT_ENABLE kFTM_Chnl0InterruptEnable | kFTM_TimeOverflowInterruptEnable
-#define FTM_CHANNEL_FLAG kFTM_Chnl0Flag
-#define FTM_OFI_FLAG kFTM_TimeOverflowFlag
+
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
@@ -925,8 +918,7 @@ void FTM_ClearStatusFlags(FTM_Type *base, uint32_t mask)
     base->STATUS &= ~(mask & 0xFFU);
 }
 
-void FTM_INPUT_CAPTURE_HANDLER(void)
-{
-	FTM_ClearStatusFlags(BOARD_FTM_BASEADDR, FTM_CHANNEL_FLAG);
-	ecual_callback(BOARD_FTM_BASEADDR->CONTROLS[BOARD_FTM_INPUT_CAPTURE_CHANNEL].CnV);
-}
+//void FTM0_IRQHandler(void)
+//{
+//	ecual_callback();
+//}

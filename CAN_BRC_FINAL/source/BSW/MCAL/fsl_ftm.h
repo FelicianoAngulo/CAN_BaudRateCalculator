@@ -51,7 +51,7 @@
 #define FSL_FTM_DRIVER_VERSION (MAKE_VERSION(2, 0, 2)) /*!< Version 2.0.2 */
                                                        /*@}*/
 /*pointer to a void function*/
-typedef void(*ptrToFunc)(uint32_t);
+typedef void(*ptrToFunc)(void);
 /*!
  * @brief List of FTM channels
  * @note Actual number of available channels is SoC dependent
@@ -973,6 +973,10 @@ static inline void FTM_SetWriteProtection(FTM_Type *base, bool enable)
     }
 }
 
+static inline uint32_t FTM_GetCapturedRegValue(FTM_Type *base, ftm_chnl_t chnlNumber)
+{
+	return base->CONTROLS[chnlNumber].CnV;
+}
 #if defined(__cplusplus)
 }
 #endif
