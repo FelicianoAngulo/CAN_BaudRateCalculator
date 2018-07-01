@@ -48,7 +48,7 @@ processor_version: 2.0.0
 #include "pin_mux.h"
 
 
-
+#define PIN4_IDX                         4u   /*!< Pin number for pin 4 in a port */
 #define PIN1_IDX                         1u   /*!< Pin number for pin 1 in a port */
 #define PIN16_IDX                       16u   /*!< Pin number for pin 16 in a port */
 #define PIN17_IDX                       17u   /*!< Pin number for pin 17 in a port */
@@ -72,9 +72,19 @@ BOARD_InitPins:
  *
  *END**************************************************************************/
 void BOARD_InitPins(void) {
+  CLOCK_EnableClock(kCLOCK_PortA);                           /* Port A Clock Gate Control: Clock enabled */
   CLOCK_EnableClock(kCLOCK_PortB);                           /* Port B Clock Gate Control: Clock enabled */
   CLOCK_EnableClock(kCLOCK_PortC);                           /* Port C Clock Gate Control: Clock enabled */
-
+  const port_pin_config_t porta4_pin38_config = {
+      kPORT_PullUp,                                            /* Internal pull-up resistor is enabled */
+      kPORT_FastSlewRate,                                      /* Fast slew rate is configured */
+      kPORT_PassiveFilterDisable,                              /* Passive filter is disabled */
+      kPORT_OpenDrainDisable,                                  /* Open drain is disabled */
+      kPORT_HighDriveStrength,                                 /* High drive strength is configured */
+      kPORT_MuxAsGpio,                                         /* Pin is configured as PTA4 */
+      kPORT_UnlockRegister                                     /* Pin Control Register fields [15:0] are not locked */
+    };
+  PORT_SetPinConfig(PORTA, PIN4_IDX, &porta4_pin38_config);  /* PORTA4 (pin 38) is configured as PTA4 */
   PORT_SetPinMux(PORTB, PIN16_IDX, kPORT_MuxAlt3);           /* PORTB16 (pin 62) is configured as UART0_RX */
   PORT_SetPinMux(PORTB, PIN17_IDX, kPORT_MuxAlt3);           /* PORTB17 (pin 63) is configured as UART0_TX */
   PORT_SetPinMux(PORTC, PIN1_IDX, kPORT_MuxAlt4);            /* PORTC1 (pin 71) is configured as FTM0_CH0 */

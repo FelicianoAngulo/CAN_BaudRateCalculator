@@ -16,6 +16,6 @@ typedef struct
 } caputureType;
 
 void FTM_ECUAL_Init(uint8_t channelID);
-void FTM_ECAL_GET_DATA(uint8_t channel, float * arrayFortimer, uint32_t * arrayForOverflow, uint16_t length);
+uint8_t FTM_ECAL_GET_DATA(uint8_t channel, uint32_t * arrayForPulses, uint16_t length);
 
 #endif /* BSW_ECUAL_FTM_ECUAL_H_ */

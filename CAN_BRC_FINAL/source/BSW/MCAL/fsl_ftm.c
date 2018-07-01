@@ -35,8 +35,6 @@
 #include "fsl_ftm.h"
 
 
-ptrToFunc ecual_callback;
-
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
@@ -224,12 +222,11 @@ static void FTM_SetReloadPoints(FTM_Type *base, uint32_t reloadPoints)
     base->SYNC = reg;
 }
 
-status_t FTM_Init(FTM_Type *base, const ftm_config_t *config, ptrToFunc callback)
+status_t FTM_Init(FTM_Type *base, const ftm_config_t *config)
 {
     assert(config);
 
     uint32_t reg;
-    ecual_callback = callback;
     if (!(config->pwmSyncMode &
           (FTM_SYNC_TRIG0_MASK | FTM_SYNC_TRIG1_MASK | FTM_SYNC_TRIG2_MASK | FTM_SYNC_SWSYNC_MASK)))
     {
@@ -918,7 +915,3 @@ void FTM_ClearStatusFlags(FTM_Type *base, uint32_t mask)
     base->STATUS &= ~(mask & 0xFFU);
 }
 
-//void FTM0_IRQHandler(void)
-//{
-//	ecual_callback();
-//}
